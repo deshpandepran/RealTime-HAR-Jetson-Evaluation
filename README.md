@@ -38,5 +38,41 @@ This project evaluates **RT-HARE** and its core component, **IMFE (Integrated Mo
 ├── eval/                    # Metrics calculation (Accuracy, Edit, F1@10, Latency)
 ├── extensions/              # Team-developed novel extensions
 ├── scripts/                 # Setup and run scripts
+│   ├── setup_jetson.sh      # Jetson Xavier NX configuration (Mode 6: 20W, 2-Core @ 1.9GHz)
+│   ├── export_tensorrt.py   # ONNX to TensorRT export with FP16/DLA acceleration
+│   └── verify_env.py        # Environment & hardware verification suite
+├── requirements.txt         # Pinned Python package dependencies
+├── environment.yml          # Conda environment configuration
 ├── train.py                 # Main training pipeline
 └── README.md                # Project documentation
+```
+
+---
+
+## ⚙️ Environment Setup (Issue #1)
+
+### 1. Workstation Setup (Dual RTX 3090, Ubuntu 20.04)
+```bash
+# Using conda
+conda env create -f environment.yml
+conda activate rt-hare
+
+# Verify environment
+python3 scripts/verify_env.py
+```
+
+### 2. Embedded Testbed Setup (NVIDIA Jetson Xavier NX, JetPack 5.1.1)
+As specified in **Section III-B** of the paper, maximum inference performance is obtained in **Power Mode 6 (20W, 2-Core)** with DVFS disabled and CPU clocks locked to 1.9 GHz:
+```bash
+# Apply power mode 6 and maximize clocks
+sudo bash scripts/setup_jetson.sh --clocks-only
+
+# Check hardware status
+sudo bash scripts/setup_jetson.sh --status
+```
+
+### 3. TensorRT Model Optimization & ONNX Export Pipeline
+```bash
+# Convert ONNX to TensorRT FP16 engine
+python3 scripts/export_tensorrt.py --onnx <model.onnx> --fp16
+```

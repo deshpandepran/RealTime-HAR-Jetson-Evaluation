@@ -1,0 +1,49 @@
+# ==============================================================================
+# RT-HARE & IMFE: Real-Time Human Action Recognition on Embedded Platforms
+# Base Requirements for DL Workstation (Ubuntu 20.04, Dual RTX 3090) and Jetson Xavier NX
+# ==============================================================================
+
+# --- PyTorch Core Ecosystem ---
+# NOTE for Workstation: Install PyTorch with CUDA 11.8/12.1 index:
+#   pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+# NOTE for Jetson (JetPack 5.1.1, aarch64, Python 3.8):
+#   Use NVIDIA pre-built wheels: torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+torch>=2.0.0,<=2.1.2
+torchvision>=0.15.0,<=0.16.2
+torchaudio>=2.0.0,<=2.1.2
+
+# --- Model Optimization & Inference Engines ---
+# ONNX format for intermediate model exchange
+onnx>=1.14.0,<=1.16.0
+onnxruntime-gpu>=1.15.0,<=1.17.1
+
+# NVIDIA TensorRT (For Jetson Xavier NX, TensorRT 8.5.2 is pre-installed in JetPack 5.1.1)
+# On workstation: pip install tensorrt==8.6.1 or matching your local TensorRT installation
+tensorrt>=8.5.2,<=8.6.1; platform_machine != "aarch64"
+pycuda>=2022.2.2
+
+# --- Computer Vision & Video Processing ---
+# NOTE: For Jetson, system OpenCV 4.5.4 with CUDA support is pre-installed via JetPack
+# For Workstation: opencv-python or custom build with CUDA/TV-L1 enabled
+opencv-python>=4.8.0.76,<5.0.0
+Pillow>=9.5.0
+av>=10.0.0
+
+# --- Scientific Computing & Utilities ---
+numpy>=1.22.4,<2.0.0
+scipy>=1.9.0
+pandas>=1.5.0
+matplotlib>=3.5.0
+seaborn>=0.12.0
+tqdm>=4.64.0
+PyYAML>=6.0
+h5py>=3.8.0
+
+# --- Evaluation & Action Segmentation Metrics ---
+# Levenshtein distance for Edit score calculation (Paper Sec. VI-E1)
+editdistance>=0.6.2
+scikit-learn>=1.2.0
+
+# --- Embedded Hardware Monitoring ---
+# Jetson statistics and monitoring utility (jtop)
+jetson-stats>=4.2.3; platform_machine == "aarch64"
