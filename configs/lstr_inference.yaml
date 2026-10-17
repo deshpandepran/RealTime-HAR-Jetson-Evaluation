@@ -1,0 +1,26 @@
+# RT-HARE / IMFE - LSTR Inference Configuration
+# Hyperparameters for the Long Short-Term Transformer (Issue #8).
+
+model:
+  name: LongShortTermTransformer
+  in_dim: 2560           # IMFE (2048) + RGB spatial (512)
+  num_classes: 50        # 50 Salads benchmark
+  d_model: 512
+  num_heads: 8
+  num_layers: 2
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 512
+  causal: true           # Online / streaming mode for Jetson
+
+inference:
+  device: cuda           # cuda | cpu
+  batch_size: 1          # Real-time: single-sample streaming
+  clip_length: 6         # K frames per IMFE input clip
+  input_h: 256
+  input_w: 344
+
+dataset:
+  name: fifty_salads
+  num_folds: 5
+  target_fps: 30
