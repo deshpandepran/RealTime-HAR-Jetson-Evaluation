@@ -1,0 +1,35 @@
+# RT-HARE / IMFE - Knowledge Distillation Training Configuration
+# Hyperparameters for training IMFE via KD from TV-L1 + ResNet-50 teacher.
+# Corresponds to Issue #6 (Knowledge Distillation Training Loop).
+
+distillation:
+  teacher: tvl1_resnet50       # Frozen TV-L1 extractor + ResNetFlowExtractor teacher
+  student: imfe                # IMFE student model
+  loss: mse                    # Mean Squared Error on feature-space outputs
+  temperature: 1.0             # Softmax temperature (N/A for MSE, reserved)
+
+training:
+  device: cuda
+  epochs: 50
+  batch_size: 8
+  clip_length: 6               # K frames per clip (K=6)
+  input_h: 256
+  input_w: 344
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  lr_scheduler: cosine         # cosine annealing
+  warmup_epochs: 5
+  gradient_clip: 1.0
+  save_every_n_epochs: 5
+  checkpoint_dir: checkpoints/
+
+dataset:
+  name: activitynet_subset
+  data_root: data/activitynet/ # Path to ActivityNet subset (4,359 videos)
+  train_split: train           # 4,059 training videos
+  val_split: val               # 300 validation videos
+  num_workers: 4
+
+logging:
+  log_dir: runs/
+  log_every_n_steps: 50

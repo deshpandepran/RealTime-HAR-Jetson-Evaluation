@@ -1,9 +1,12 @@
-from .baselines import RGBBaseline, TwoStreamBaseline
-from .resnet_flow import RAFTFlowExtractor, ResNetFlowFeatureExtractor
+from .baselines import RGBOnlyBaseline, RAFTFlowExtractor
+from .resnet_flow import ResNetFlowExtractor
+from .imfe import IMFE
+from .lstr import LongShortTermTransformer
 
 __all__ = [
-    "RGBBaseline",
-    "TwoStreamBaseline",
+    "RGBOnlyBaseline",
     "RAFTFlowExtractor",
-    "ResNetFlowFeatureExtractor",
+    "ResNetFlowExtractor",
+    "IMFE",
+    "LongShortTermTransformer",
 ]
