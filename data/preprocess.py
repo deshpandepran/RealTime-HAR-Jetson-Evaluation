@@ -1,4 +1,4 @@
-import torch
+`import torch
 import torchvision.transforms as T
 import numpy as np
 import cv2
@@ -29,7 +29,10 @@ class VideoPreprocessor:
             if frame.dtype != np.float32:
                 frame = frame.astype(np.float32) / 255.0
             # Convert H x W x C to C x H x W
-            frame_tensor = torch.from_numpy(frame).permute(2, 0, 1)
+            try:
+                frame_tensor = torch.from_numpy(frame).permute(2, 0, 1)
+            except RuntimeError:
+                frame_tensor = torch.frombuffer(bytearray(frame.tobytes()), dtype=torch.float32).reshape(frame.shape).permute(2, 0, 1)
             frame_tensor = self.normalize(frame_tensor)
             processed_frames.append(frame_tensor)
             

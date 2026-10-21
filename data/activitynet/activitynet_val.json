@@ -1,0 +1,17 @@
+[
+  {
+    "video_path": "C:\\Users\\rajor\\OneDrive\\Documents\\RealTime-HAR-Jetson-Evaluation\\data\\activitynet\\val\\act_val_0000.mp4"
+  },
+  {
+    "video_path": "C:\\Users\\rajor\\OneDrive\\Documents\\RealTime-HAR-Jetson-Evaluation\\data\\activitynet\\val\\act_val_0001.mp4"
+  },
+  {
+    "video_path": "C:\\Users\\rajor\\OneDrive\\Documents\\RealTime-HAR-Jetson-Evaluation\\data\\activitynet\\val\\act_val_0002.mp4"
+  },
+  {
+    "video_path": "C:\\Users\\rajor\\OneDrive\\Documents\\RealTime-HAR-Jetson-Evaluation\\data\\activitynet\\val\\act_val_0003.mp4"
+  },
+  {
+    "video_path": "C:\\Users\\rajor\\OneDrive\\Documents\\RealTime-HAR-Jetson-Evaluation\\data\\activitynet\\val\\act_val_0004.mp4"
+  }
+]
