@@ -1,4 +1,4 @@
-`import torch
+import torch
 import torchvision.transforms as T
 import numpy as np
 import cv2
