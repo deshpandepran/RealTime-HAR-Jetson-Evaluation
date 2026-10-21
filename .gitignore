@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch checkpoints and models
+*.pt
+*.pth
+*.bin
+*.onnx
+*.engine
+*.plan
+checkpoints/
+runs/
+
+# Large dataset video binaries (keep annotations & scripts)
+data/activitynet/train/*.mp4
+data/activitynet/train/*.avi
+data/activitynet/val/*.mp4
+data/activitynet/val/*.avi
+data/fifty_salads/videos/*.avi
+data/fifty_salads/videos/*.mp4
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
