@@ -125,15 +125,15 @@ def run_distillation(config: dict, args: argparse.Namespace):
         args: CLI arguments namespace.
     """
     try:
-        from distillation.train_kd import run_kd_training
+        from distillation import run_kd_training
     except ImportError:
-        logger.error(
-            "distillation/train_kd.py not yet implemented (Issue #6). "
-            "Run this stage once Issue #6 is merged into main."
-        )
-        sys.exit(1)
+        try:
+            from distillation.train_kd import run_kd_training
+        except ImportError:
+            logger.error("distillation training module not found.")
+            sys.exit(1)
 
-    logger.info("Starting Knowledge Distillation training (Issue #6)...")
+    logger.info("Starting Knowledge Distillation training...")
     run_kd_training(config, args)
 
 
