@@ -1,3 +1,10 @@
 # distillation/__init__.py
-# Knowledge Distillation training loop for IMFE (Issue #6).
-# Placeholder — full implementation in distillation/train_kd.py (Issue #6).
+from distillation.loss import FeatureDistillationLoss
+from distillation.trainer import KnowledgeDistillationTrainer, TeacherFlowPipeline, run_kd_training
+
+__all__ = [
+    "FeatureDistillationLoss",
+    "KnowledgeDistillationTrainer",
+    "TeacherFlowPipeline",
+    "run_kd_training",
+]
