@@ -97,3 +97,27 @@ python eval/profile_latency.py
 ### IMFE Model Execution
 
 The IMFE architecture processes temporal video clips through batched feature encoding, correlation modules, dimension compression layers, and a final residual encoder to yield motion feature representations in a single forward pass.
+
+
+## Windows Install (CPU-only laptop)
+
+TensorRT and PyCUDA are Jetson/Linux-only. On Windows:
+
+    conda create -n rt-hare python=3.10 -y
+    conda activate rt-hare
+    pip install -r requirements.txt
+
+On a Jetson or a CUDA workstation, additionally run `pip install -r requirements-jetson.txt`.
+
+## Live Demo
+
+    python extensions/live_demo.py                          # webcam
+    python extensions/live_demo.py --video clip.mp4 --no-display --max-clips 5
+
+Without trained IMFE/LSTR checkpoints the weights are random, so predictions
+are meaningless and only latency is measured. Pass checkpoints with
+`--imfe-ckpt` and `--lstr-ckpt`.
+
+## New Use Case: Anomaly Detection (UCSD Ped2)
+
+In progress. Results, latency and limitations will be added here.
