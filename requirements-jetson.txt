@@ -1,0 +1,4 @@
+# NVIDIA TensorRT (For Jetson Xavier NX, TensorRT 8.5.2 is pre-installed in JetPack 5.1.1)
+# On workstation: pip install tensorrt==8.6.1 or matching your local TensorRT installation
+tensorrt>=8.5.2,<=8.6.1; platform_machine != "aarch64"
+pycuda>=2022.2.2

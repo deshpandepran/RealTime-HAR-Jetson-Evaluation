@@ -33,7 +33,7 @@ dependencies:
       - onnxruntime-gpu>=1.15.0,<=1.17.1
       # TensorRT and PyCUDA for engine compilation and inference
       - tensorrt>=8.5.2,<=8.6.1; sys_platform != "win32" and platform_machine != "aarch64"
-      - pycuda>=2022.2.2
+      - pycuda>=2022.2.2; sys_platform != "win32"
       # Computer Vision & Video
       - opencv-python>=4.8.0.76,<5.0.0
       - av>=10.0.0
