@@ -7,17 +7,21 @@ Orchestrates the full training workflow:
   Stage 1 (Issue #6):  Knowledge Distillation — train IMFE student from
                         frozen TV-L1 + ResNetFlowExtractor teacher via MSE loss.
 
-  Stage 2 (Issue #7):  LSTR fine-tuning on 50 Salads with the pre-trained IMFE
-                        backbone frozen (or jointly trained).
+  Stage 2 (Issue #7):  LSTR training on 50 Salads with ground-truth labels.
+                        Uses pre-extracted IMFE feature .npy files when
+                        available, or synthetic features for smoke-testing when
+                        no video files are present.
 
 Usage
 -----
     # Stage 1: Knowledge Distillation
     python train.py --stage distill --config configs/imfe_distillation.yaml
 
-    # Stage 2: LSTR training (requires pre-trained IMFE checkpoint)
-    python train.py --stage lstr --config configs/lstr_inference.yaml \
-                    --imfe-checkpoint checkpoints/imfe_best.pt
+    # Stage 2: LSTR training (pre-extracted features recommended)
+    python train.py --stage lstr --config configs/lstr_training.yaml
+
+    # Stage 2: LSTR smoke-test (no videos or GPU needed)
+    python train.py --stage lstr --config configs/lstr_training.yaml --smoke-test
 
     # Verify environment only
     python train.py --verify-only
@@ -81,6 +85,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run environment + architecture verification and exit.",
     )
+    parser.add_argument(
+        "--smoke-test",
+        action="store_true",
+        help=(
+            "LSTR stage only: run 2 epochs with synthetic features and a tiny "
+            "batch so the full training loop can be verified without video files "
+            "or a trained IMFE checkpoint."
+        ),
+    )
     return parser
 
 
@@ -143,69 +156,44 @@ def run_distillation(config: dict, args: argparse.Namespace):
 
 def run_lstr_training(config: dict, args: argparse.Namespace):
     """
-    Fine-tunes the LSTR module on 50 Salads using pre-extracted IMFE features.
-    Loads a pre-trained IMFE checkpoint from --imfe-checkpoint.
+    Full LSTR training loop on 50 Salads (Issue #7).
+
+    Delegates to ``distillation/train_lstr.py::run_lstr_training`` which
+    implements the complete pipeline:
+      - 5-fold deterministic split matching the 50 Salads evaluation protocol
+      - FiftySaladsFeaturesDataset with sliding-window sampling
+      - Pre-extracted IMFE feature loading *or* synthetic feature fallback
+      - AdamW + cosine-annealing LR schedule with warm-up
+      - Per-epoch train / val metrics logging
+      - Periodic + best-model checkpointing
+      - JSON training-history export
 
     Args:
         config: Parsed YAML configuration dictionary.
         args: CLI arguments namespace.
     """
-    import torch
-    from models import IMFE, LongShortTermTransformer
-    from data.fifty_salads import FiftySaladsDataset
+    try:
+        from distillation.train_lstr import run_lstr_training as _run
+    except ImportError as exc:
+        logger.error("Failed to import LSTR training loop: %s", exc)
+        sys.exit(1)
 
-    device_str = args.device or config.get("inference", {}).get("device", "cpu")
-    device = torch.device(device_str if torch.cuda.is_available() else "cpu")
-    logger.info(f"LSTR training on device: {device}")
-
-    # Load IMFE
-    imfe = IMFE(clip_length=6, feature_dim=2048).to(device)
-    if args.imfe_checkpoint:
-        if not os.path.exists(args.imfe_checkpoint):
-            logger.error(f"IMFE checkpoint not found: {args.imfe_checkpoint}")
-            sys.exit(1)
-        imfe.load_state_dict(torch.load(args.imfe_checkpoint, map_location=device))
-        logger.info(f"Loaded IMFE checkpoint: {args.imfe_checkpoint}")
-    else:
-        logger.warning(
-            "No --imfe-checkpoint provided. IMFE will use random weights. "
-            "Run distillation stage first (Issue #6) to get a trained IMFE."
-        )
-
-    # Freeze IMFE for LSTR training
-    for param in imfe.parameters():
-        param.requires_grad = False
-    imfe.eval()
-    logger.info("IMFE backbone frozen.")
-
-    # Initialize LSTR
-    num_classes = config.get("model", {}).get("num_classes", 50)
-    lstr = LongShortTermTransformer(
-        in_dim=2048,
-        num_classes=num_classes,
-        d_model=config.get("model", {}).get("d_model", 512),
-        num_heads=config.get("model", {}).get("num_heads", 8),
-        num_layers=config.get("model", {}).get("num_layers", 2),
-        causal=config.get("model", {}).get("causal", True),
-    ).to(device)
-    logger.info(f"LSTR initialized: {sum(p.numel() for p in lstr.parameters()):,} params")
-
-    # Dataset (requires actual data files on disk)
-    data_root = args.data_root or config.get("dataset", {}).get("data_root", "data/fifty_salads/")
-    logger.info(f"Dataset root: {data_root}")
-
+    # Validate data root early so the user gets a clear error message
+    data_root = args.data_root or config.get("dataset", {}).get(
+        "data_root", "data/fifty_salads/"
+    )
     if not os.path.exists(data_root):
         logger.error(
-            f"50 Salads data root not found at '{data_root}'. "
-            "Download the dataset and update --data-root or configs/lstr_inference.yaml."
+            "50 Salads data root not found at '%s'. "
+            "Ensure 'data/fifty_salads/groundTruth/' exists "
+            "(it was added via a recent PR). "
+            "Override with --data-root if needed.",
+            data_root,
         )
         sys.exit(1)
 
-    # Placeholder: full training loop belongs to Issue #7
-    logger.warning(
-        "Full LSTR training loop belongs to Issue #7. "
-        "Implement distillation/train_lstr.py for the complete loop."
-    )
+    logger.info("Starting LSTR training (Issue #7)…")
+    _run(config, args)
 
 
 # ─────────────────────────────────────────────────────────────

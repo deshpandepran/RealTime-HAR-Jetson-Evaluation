@@ -1,0 +1,44 @@
+# RT-HARE / IMFE — LSTR Training Configuration  (Issue #7)
+# Fine-tunes the Long Short-Term Transformer on the 50 Salads benchmark using
+# pre-extracted IMFE features (or on-the-fly with a frozen IMFE backbone).
+
+model:
+  name: LongShortTermTransformer
+  in_dim: 2048           # IMFE feature dimension (set 2560 for IMFE+RGB concat)
+  num_classes: 19        # 50 Salads: 18 fine-grained actions + background
+  d_model: 512
+  num_heads: 8
+  num_layers: 2
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 512
+  causal: true           # Online / streaming mode for Jetson
+
+training:
+  device: cuda           # cuda | cpu — falls back to cpu automatically if no GPU
+  epochs: 30
+  batch_size: 4          # Number of video sequences per batch
+  window_size: 64        # T — temporal window length fed to LSTR per step
+  stride: 32             # Sliding-window stride during training
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  lr_scheduler: cosine   # cosine | step | none
+  warmup_epochs: 3
+  gradient_clip: 1.0
+  checkpoint_dir: checkpoints/lstr/
+  save_every_n_epochs: 5
+  num_workers: 2         # DataLoader worker threads (0 for debugging)
+
+dataset:
+  name: fifty_salads
+  data_root: data/fifty_salads/
+  feature_dir: data/fifty_salads/features/   # Pre-extracted IMFE .npy per-video
+  num_folds: 5
+  eval_fold: 1           # Which fold to use as validation (1-indexed)
+  target_fps: 30
+  clip_length: 6         # K frames consumed by IMFE per feature vector
+  background_label: background  # Label name treated as class 0
+
+logging:
+  log_dir: runs/lstr/
+  log_every_n_steps: 10
