@@ -1,0 +1,44 @@
+# RT-HARE / IMFE - UCSD Ped2 Anomaly Detection Configuration
+# New use case: validate RT-HARE on a dataset other than 50 Salads (Issue #24).
+# Uses the frozen, pre-trained IMFE; only LSTR is trained on the new labels.
+
+model:
+  name: LongShortTermTransformer
+  in_dim: 4096           # IMFE (2048) + RGB ResNet-50 (2048). Use 2560 if the team's LSTR uses a 512-d RGB feature
+  num_classes: 2         # 0 = normal, 1 = anomaly
+  d_model: 512
+  num_heads: 8
+  num_layers: 2
+  dim_feedforward: 2048
+  dropout: 0.1
+  max_seq_len: 512
+  causal: true           # Online / streaming mode
+
+features:
+  imfe_checkpoint: checkpoints/imfe.pt   # trained IMFE from Issue #7 (frozen here)
+  rgb_dim: 2048
+  clip_length: 6         # K frames per IMFE input clip
+  input_h: 256
+  input_w: 344
+
+training:                # LSTR on Ped2 features
+  device: cuda
+  epochs: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  class_weights: [1.0, 3.0]   # anomalies are rarer than normal frames; tune on validation
+  checkpoint_dir: checkpoints/ped2/
+
+dataset:
+  name: ucsd_ped2
+  data_root: data/ucsd_ped2/UCSDped2/   # folder containing Train/ and Test/
+  num_folds: 4           # the 12 Test videos are split by video into 4 folds
+  include_normal_train: true   # add the all-normal Train videos to the training split
+  stride: 6              # non-overlapping clips = one prediction per 6 frames
+  native_fps: 10         # Ped2 is recorded at about 10 FPS
+
+evaluation:
+  metrics: [accuracy, edit, f1@10, f1@25, f1@50]
+  post_process: true     # HybridPostProcessor from models/post_processing.py
+  fps: 10
