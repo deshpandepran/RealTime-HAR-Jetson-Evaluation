@@ -133,7 +133,10 @@ class UCSDPed2Dataset(Dataset):
         clip = self.preprocessor.process_clip(
             [self._read_frame(frames[start + k]) for k in range(K)]
         )
-        frame_labels = torch.from_numpy(labels[start:start + K])
+        try:
+            frame_labels = torch.from_numpy(labels[start:start + K])
+        except RuntimeError:
+            frame_labels = torch.tensor(labels[start:start + K].tolist(), dtype=torch.long)
         return {
             "clip": clip,                              # (K, 3, 256, 344)
             "label": int(labels[start + K - 1]),       # label of the last frame
